@@ -1,0 +1,10 @@
+DeviceDescriptor.iManufacturer max_size:64
+DeviceDescriptor.iProduct max_size:64
+
+HIDReport.data max_size:256
+
+InputReport.data max_size:64
+
+Packet.sequence_number int_size:IS_8
+Packet.crc int_size:IS_8
+Packet.data max_size:16
