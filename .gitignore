@@ -3,3 +3,7 @@ build/
 python_venv
 
 test/test_runners/
+
+src/hid.pb.c
+
+src/hid.pb.h
