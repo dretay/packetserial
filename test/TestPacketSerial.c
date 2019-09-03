@@ -197,7 +197,7 @@ void dummy_test_send_big_hid_report_parse_hidreport(pb_istream_t* stream, const 
 {
     HIDReport report;
     if (ProtoBuff.decode_union(stream, type, &report)) {
-        TEST_ASSERT_EQUAL_STRING("test1test2test3test4test5test6test7test", report.data);
+        TEST_ASSERT_EQUAL_STRING("test1test2test3test4test5test6test7testtest1test2test3test4test5test6test7test", report.data);
     } else {
         TEST_FAIL_MESSAGE("Failed to parse report");
     }
@@ -211,7 +211,7 @@ bool dummy_test_send_big_hid_report_packet_parser(pb_istream_t* stream)
         dummy_test_send_big_hid_report_messages_offset += packet_data_size;
 
         if (packet.flag == Packet_Flag_LAST) {
-            bool result = ProtoBuff.unmarshal(dummy_test_send_big_hid_report_messages, 300, false);
+            bool result = ProtoBuff.unmarshal((u8*)dummy_test_send_big_hid_report_messages, 300, true);
             TEST_ASSERT_TRUE(result);
         }
     } else {
@@ -230,9 +230,9 @@ void test_send_big_hid_report(void)
     bool result = ProtoBuff.add_handler(HIDReport_fields, &dummy_test_send_big_hid_report_parse_hidreport);
     UnionMessage message = UnionMessage_init_zero;
     message.has_hid_report = true;
-    strncpy(message.hid_report.data, "test1test2test3test4test5test6test7test", strlen("test1test2test3test4test5test6test7test") + 1);
-    uint8_t my_buffer[100] = { 0 };
-    int size = ProtoBuff.marshal(&message, UnionMessage_fields, my_buffer, 100, true);
+    strncpy(message.hid_report.data, "test1test2test3test4test5test6test7testtest1test2test3test4test5test6test7test", strlen("test1test2test3test4test5test6test7testtest1test2test3test4test5test6test7test") + 1);
+    uint8_t my_buffer[300] = { 0 };
+    int size = ProtoBuff.marshal(&message, UnionMessage_fields, my_buffer, 300, true);
 
     PacketSerial.register_tx_handler(&dummy_test_send_big_hid_report_tx_handler);
     bool success = PacketSerial.send((char*)my_buffer, size);
