@@ -10,13 +10,9 @@ to dump a variable: $(info $$var is [${var}])
 run an individual test:
 rm build/TestPacketSerial.c.o.out&& make&&make build/TestPacketSerial.c.o.out && ./build/TestPacketSerial.c.o.out -v
 
-
-to install perf:
-sudo sysctl -w kernel.perf_event_paranoid=1
-sudo apt-get install inux-tools-common linux-tools-5.0.0-25-generic linux-tools-generic
-vi /etc/sysctl.d/99-mysettings.conf, kernel.perf_event_paranoid=1
+to look at performance
+make profile
+kcachegrind build/profiling_results/TestPacketSerial.out
 
 to debug a test
 kdbg build/TestPacketSerial.c.o.out
-
-NEXT STEPS
