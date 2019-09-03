@@ -1,0 +1,5 @@
+-Ilib/log
+-Ilib/crc8
+-Ilib/cobs-c-0.5.0
+-Ilib/nanopb-0.3.9.3
+-I/home/drew/src/Unity/src
