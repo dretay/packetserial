@@ -16,3 +16,6 @@ kcachegrind build/profiling_results/TestPacketSerial.out
 
 to debug a test
 kdbg build/TestPacketSerial.c.o.out
+
+to build an arm so
+make clean && make sharedobject PLATFORM=ARM DEBUG=0

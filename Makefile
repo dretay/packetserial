@@ -56,9 +56,26 @@ CPPCHECK_RESULTS = $(CPPCHECK_FILES:%=$(CPPCHECK_RESULTS_DIR)%.txt)
 
 #misc variables
 DIRECTIVES = -DPB_FIELD_16BIT -DLOG_USE_COLOR -DUNITY_OUTPUT_COLOR
-CFLAGS = $(INC_FLAGS) $(DIRECTIVES) -fPIC -Wno-format-extra-args -g3
+FLAGS = -fPIC
 INC_FLAGS := $(addprefix -I,$(INC_DIRS)) -I$(UNITY_ROOT)/src -I./src
 CURRENT_DIR = $(notdir $(shell pwd))
+
+#various build flags
+DEBUG ?= 1
+ifeq ($(DEBUG), 1)
+	CFLAGS = $(INC_FLAGS) $(FLAGS) $(DIRECTIVES) -g3
+else
+	CFLAGS = $(INC_FLAGS) $(FLAGS) $(DIRECTIVES) -g0
+endif
+
+PLATFORM ?= LINUX
+ifeq ($(PLATFORM), ARM)
+	CC = arm-none-eabi-gcc
+	LD = arm-none-eabi-gcc
+else
+	CC = gcc
+	LD = gcc
+endif
 
 .PHONY: all
 .PHONY: sharedobject
@@ -70,7 +87,7 @@ CURRENT_DIR = $(notdir $(shell pwd))
 .PHONY: cppcheck
 
 all: $(PBMODELS) $(RUNNERS) $(OBJS) cppcheck
-sharedobject: $(BUILD_DIR)$(CURRENT_DIR).so
+sharedobject: all $(BUILD_DIR)$(CURRENT_DIR).so
 
 test: all $(TEST_OBJS) $(TEST_RESULTS) $(CPPCHECK_RESULTS)
 	@echo ""
