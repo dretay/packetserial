@@ -7,3 +7,5 @@ test/test_runners/
 src/hid.pb.c
 
 src/hid.pb.h
+
+packetserial.sublime-workspace
