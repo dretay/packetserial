@@ -15,6 +15,7 @@ endif
 
 #directories
 BUILD_DIR = build/
+RELEASE_DIR = release/
 PROFILING_RESULTS_DIR = $(BUILD_DIR)profiling_results/
 CPPCHECK_RESULTS_DIR = $(BUILD_DIR)cppcheck_results/
 TEST_RESULTS_DIR = $(BUILD_DIR)test_results/
@@ -24,6 +25,7 @@ SRC_DIRS = src/
 LIB_DIRS = lib/
 TEST_DIRS = test/
 TEST_RUNNERS = $(TEST_DIRS)test_runners/
+INCLUDE_DEST = $(RELEASE_DIR)include/
 
 #protobuf files
 SRCPB = $(wildcard $(SRC_DIRS)*.proto)
@@ -45,6 +47,7 @@ VALGRIND_SUPPS = $(CONFIG_DIR)valgrind.memcheck.supp
 
 #project source files
 SRCS := $(shell find $(LIB_DIRS) $(SRC_DIRS) -maxdepth 2 \( -iname "*.c" ! -iname "*.pb.c" \))
+HEADERS = $(shell find $(LIB_DIRS) $(SRC_DIRS) -maxdepth 2 \( -iname "*.h" \))
 OBJS = $(SRCS:%=$(BUILD_DIR)%.o) $(PB_OBJS)
 INC_DIRS := $(shell find $(LIB_DIRS) -maxdepth 1 -type d)
 
@@ -64,20 +67,31 @@ CURRENT_DIR = $(notdir $(shell pwd))
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
 	CFLAGS = $(INC_FLAGS) $(FLAGS) $(DIRECTIVES) -g3
+	LDFLAGS = -shared
+	ARFLAGS = rcs
 else
-	CFLAGS = $(INC_FLAGS) $(FLAGS) $(DIRECTIVES) -g0
+	CFLAGS = $(INC_FLAGS) $(FLAGS) $(DIRECTIVES) -Os
+	LDFLAGS = -shared
+	ARFLAGS = rcs
 endif
 
 PLATFORM ?= LINUX
 ifeq ($(PLATFORM), ARM)
 	CC = arm-none-eabi-gcc
 	LD = arm-none-eabi-gcc
+	AR = arm-none-eabi-ar
 else
 	CC = gcc
 	LD = gcc
+	AR = ar
 endif
 
+
+# $(info $$HEADERS is [${HEADERS}])
+
+
 .PHONY: all
+.PHONY: staticlibrary
 .PHONY: sharedobject
 .PHONY: test
 .PHONY: profile
@@ -85,9 +99,16 @@ endif
 .PHONY: pythondeps
 .PHONY: clean
 .PHONY: cppcheck
+.PHONY: includes
 
 all: $(PBMODELS) $(RUNNERS) $(OBJS) cppcheck
-sharedobject: all $(BUILD_DIR)$(CURRENT_DIR).so
+
+includes: $(PBMODELS)
+	$(MKDIR) $(INCLUDE_DEST)
+	cp $(HEADERS) $(INCLUDE_DEST)
+
+staticlibrary: sharedobject $(RELEASE_DIR)lib$(CURRENT_DIR).a
+sharedobject: all includes $(BUILD_DIR)lib$(CURRENT_DIR).so
 
 test: all $(TEST_OBJS) $(TEST_RESULTS) $(CPPCHECK_RESULTS)
 	@echo ""
@@ -107,9 +128,12 @@ test: all $(TEST_OBJS) $(TEST_RESULTS) $(CPPCHECK_RESULTS)
 
 profile: all $(PROFILING_RESULTS)
 
+$(RELEASE_DIR)lib$(CURRENT_DIR).a:
+	$(AR) $(ARFLAGS) $@ $(BUILD_DIR)lib$(CURRENT_DIR).so
+
 #link objects into an so to be included elsewhere
-$(BUILD_DIR)$(CURRENT_DIR).so: $(OBJS)
-	$(LD) $(OBJS) -shared -o $@
+$(BUILD_DIR)lib$(CURRENT_DIR).so: $(OBJS)
+	$(LD) $(LDFLAGS) $(OBJS) -shared -o $@
 
 #generate profiling data
 $(PROFILING_RESULTS_DIR)%.out: $(BUILD_DIR)%.c.o.$(TARGET_EXTENSION)
@@ -162,7 +186,9 @@ pythondeps:
 	)
 
 clean:
-	$(CLEANUP) $(OBJS) $(TEST_OBJS)	$(TEST_RESULTS) $(CPPCHECK_RESULTS) $(BUILD_DIR)*.out $(SRC_DIRS)*.pb.*
+	$(CLEANUP) $(SRC_DIRS)*.pb.*
+	$(CLEANUP)r $(BUILD_DIR)
+	$(CLEANUP)r $(RELEASE_DIR)
 
 .PRECIOUS: $(TEST_RESULTS_DIR)%.txt
 .PRECIOUS: $(PROFILING_RESULTS_DIR)%.txt
