@@ -4,7 +4,7 @@
 	[
 		{
 			"path": ".",
-			"folder_exclude_patterns": [".ipynb_checkpoints", ".pytest_cache", "bin","build", "Debug", "etc", "include", "lib64","share", "test/test_runners"],
+			"folder_exclude_patterns": [".ipynb_checkpoints", ".pytest_cache", "bin","build", "Debug", "etc", "include", "lib64","share", "test/test_runners", "python_venv"],
 			"file_exclude_patterns": ["packetserial.sublime-project", ".clang_complete", ".gitignore"]
 		}
 	],

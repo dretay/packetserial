@@ -91,7 +91,7 @@ endif
 
 
 .PHONY: all
-.PHONY: staticlibrary
+.PHONY: release
 .PHONY: sharedobject
 .PHONY: test
 .PHONY: profile
@@ -107,7 +107,7 @@ includes: $(PBMODELS)
 	$(MKDIR) $(INCLUDE_DEST)
 	cp $(HEADERS) $(INCLUDE_DEST)
 
-staticlibrary: sharedobject $(RELEASE_DIR)lib$(CURRENT_DIR).a
+release: sharedobject $(RELEASE_DIR)lib$(CURRENT_DIR).a
 sharedobject: all includes $(BUILD_DIR)lib$(CURRENT_DIR).so
 
 test: all $(TEST_OBJS) $(TEST_RESULTS) $(CPPCHECK_RESULTS)

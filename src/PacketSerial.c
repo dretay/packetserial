@@ -1,7 +1,9 @@
 #include "PacketSerial.h"
 
+static char packet_buffer[PACKET_BUFFER_SIZE];
+static char* packet_buffer_offset = packet_buffer;
+
 static bool (*tx_handler)(u8* buffer, size_t size);
-static bool (*rx_handler)(u8* buffer, size_t size);
 
 static u8 calculate_crc(const char* buffer, size_t size)
 {
@@ -68,17 +70,7 @@ static bool send(const char* buffer, size_t size)
     }
     return return_status;
 }
-static void update(void)
-{
-}
-static void register_rx_handler(void* handler)
-{
-    rx_handler = handler;
-}
-static PACKETSERIAL_HANDLER_FNP get_rx_handler(void)
-{
-    return rx_handler;
-}
+
 static void register_tx_handler(void* handler)
 {
     tx_handler = handler;
@@ -91,17 +83,61 @@ static PACKETSERIAL_HANDLER_FNP get_tx_handler(void)
 static void clear_handlers(void)
 {
     tx_handler = NULL;
-    rx_handler = NULL;
 }
 
+static void reset_packet_buffer(void)
+{
+    packet_buffer_offset = packet_buffer;
+    memset(packet_buffer, 0, sizeof(packet_buffer));
+}
+static bool packet_parser(pb_istream_t* stream)
+{
+    Packet packet;
+    if (ProtoBuff.decode(stream, Packet_fields, &packet)) {
+        int packet_data_size = strlen(packet.data);
+        strncpy(packet_buffer_offset, packet.data, packet_data_size);
+        packet_buffer_offset += packet_data_size;
+        log_trace("Packet buffer now at %d/%d (%d rx'd)", (packet_buffer_offset - packet_buffer), PACKET_BUFFER_SIZE, packet_data_size);
+
+        if (packet.flag == Packet_Flag_LAST) {
+            log_trace("Last packet received, attempting to parse");
+            if (ProtoBuff.unmarshal((u8*)packet_buffer, PACKET_BUFFER_SIZE, true)) {
+                log_trace("Parsing successful, resetting buffer");
+                reset_packet_buffer();
+            } else {
+                log_trace("Unable to parse data, resetting buffer");
+                reset_packet_buffer();
+                return false;
+            }
+        }
+    } else {
+        log_trace("Unable to decode stream into pb model");
+        return false;
+    }
+    return true;
+}
+static bool process(const char* buffer, size_t size)
+{
+    log_trace("processing incoming packet");
+    return ProtoBuff.explicit_unmarshal((u8*)buffer, size, true, packet_parser);
+}
+static char* get_packet_buffer_offset(void)
+{
+    return packet_buffer_offset;
+}
+static char* get_packet_buffer(void)
+{
+    return packet_buffer;
+}
 const struct packetserial PacketSerial = {
     .send = send,
-    .update = update,
     .register_tx_handler = register_tx_handler,
-    .register_rx_handler = register_rx_handler,
-    .get_rx_handler = get_rx_handler,
     .get_tx_handler = get_tx_handler,
+    .process = process,
     .clear_handlers = clear_handlers,
     .calculate_crc = calculate_crc,
     .build_packet = build_packet,
+    .reset_packet_buffer = reset_packet_buffer,
+    .get_packet_buffer_offset = get_packet_buffer_offset,
+    .get_packet_buffer = get_packet_buffer,
 };
