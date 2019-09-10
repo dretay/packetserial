@@ -11,6 +11,7 @@ void setUp(void)
 void tearDown(void)
 {
     PacketSerial.clear_handlers();
+    PacketSerial.reset_rx_buffer();
     ProtoBuff.clear_handlers();
 }
 
@@ -259,9 +260,7 @@ void dummy_test_receive_report_parser(pb_istream_t* stream, const pb_field_t* ty
 }
 bool dummy_test_receive_report_tx_handler(u8* buffer, size_t size)
 {
-    uint8_t decoded_data_array[size];
-    cobs_decode(decoded_data_array, BUFFER_SIZE, buffer, size - 1);
-    return PacketSerial.process((const char*)decoded_data_array, size);
+    return PacketSerial.process((const char*)buffer, size);
 }
 void test_receive_report(void)
 {

@@ -1,6 +1,8 @@
 #include "PacketSerial.h"
 
 static char packet_buffer[PACKET_BUFFER_SIZE];
+static char rx_buffer[Packet_size + 1];
+static int rx_buffer_remaining = Packet_size + 1;
 static char* packet_buffer_offset = packet_buffer;
 
 static bool (*tx_handler)(u8* buffer, size_t size);
@@ -102,6 +104,11 @@ static void reset_packet_buffer(void)
     packet_buffer_offset = packet_buffer;
     memset(packet_buffer, 0, sizeof(packet_buffer));
 }
+static void reset_rx_buffer(void)
+{
+    rx_buffer_remaining = Packet_size + 1;
+    memset(rx_buffer, 0, sizeof(rx_buffer));
+}
 static bool packet_parser(pb_istream_t* stream)
 {
     Packet packet;
@@ -130,8 +137,32 @@ static bool packet_parser(pb_istream_t* stream)
 }
 static bool process(const char* buffer, size_t size)
 {
-    log_trace("processing incoming packet");
-    return ProtoBuff.explicit_unmarshal((u8*)buffer, size, true, packet_parser);
+    log_debug("processing incoming data");
+    if (size > rx_buffer_remaining) {
+        log_error("rx buffer overflow, unable to process packet: needed %d but only %d remaining", size, rx_buffer_remaining);
+        return false;
+    }
+    strncpy(rx_buffer, buffer, size);
+    rx_buffer_remaining -= size;
+    if (buffer[size] == '\0') {
+        log_debug("delimited packet received, attempting to process process:");
+
+        char hex_str[(size * 2) + 1];
+        string2hexstring((char*)buffer, hex_str);
+        log_trace("\t%s", hex_str);
+
+        uint8_t decoded_data_array[size];
+        cobs_decode(decoded_data_array, size, buffer, size - 1);
+        bool return_val = ProtoBuff.explicit_unmarshal((u8*)decoded_data_array, size, true, packet_parser);
+        if (return_val) {
+            log_debug("packet successfully parsed");
+            reset_rx_buffer();
+        } else {
+            log_error("unable to parse packet!");
+        }
+        return return_val;
+    }
+    return true;
 }
 static char* get_packet_buffer_offset(void)
 {
@@ -152,4 +183,5 @@ const struct packetserial PacketSerial = {
     .reset_packet_buffer = reset_packet_buffer,
     .get_packet_buffer_offset = get_packet_buffer_offset,
     .get_packet_buffer = get_packet_buffer,
+    .reset_rx_buffer = reset_rx_buffer,
 };

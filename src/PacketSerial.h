@@ -35,6 +35,7 @@ struct packetserial {
     void (*reset_packet_buffer)(void);
     char* (*get_packet_buffer_offset)(void);
     char* (*get_packet_buffer)(void);
+    void (*reset_rx_buffer)(void);
 };
 
 extern const struct packetserial PacketSerial;
