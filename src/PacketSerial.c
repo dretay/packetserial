@@ -20,6 +20,7 @@ static void build_packet(Packet* packet, const char* buffer, size_t size, u8 seq
     packet->sequence_number = sequence_number;
     packet->flag = flag;
 }
+
 static bool send(const char* buffer, size_t size)
 {
     unsigned int data_chunk_size = member_size(Packet, data) - 1;
@@ -55,13 +56,24 @@ static bool send(const char* buffer, size_t size)
 
         build_packet(&packet, buffer_offset, packet_data_chunk_size, i, flag);
         buffer_offset += packet_data_chunk_size;
-        u8 buffer[Packet_size] = { 0 };
 
-        size_t size = ProtoBuff.marshal(&packet, Packet_fields, buffer, Packet_size, true);
+        u8 unencoded_buffer[Packet_size] = { 0 };
+        u8 encoded_buffer[Packet_size + 1] = { 0 };
+
+        size_t pb_msg_size = ProtoBuff.marshal(&packet, Packet_fields, unencoded_buffer, Packet_size, true);
+        cobs_encode_result result = cobs_encode(encoded_buffer, Packet_size + 1, unencoded_buffer, pb_msg_size);
+        size_t encoded_size = result.out_len + 1;
+        encoded_buffer[encoded_size - 1] = 0;
+        log_trace("%d size pb encoded messaged translated to %d size cobs-encoded message", pb_msg_size, encoded_size);
 
         if (tx_handler != NULL) {
-            log_trace("Transmitted %ld bytes of %d buffer for packet %d of %d", size, Packet_size, i, total_chunks - 1);
-            bool tx_result = tx_handler(buffer, size);
+            log_debug("Transmitted %ld bytes of %d buffer for packet %d of %d", encoded_size, Packet_size, i, total_chunks - 1);
+
+            char hex_str[(encoded_size * 2) + 1];
+            string2hexstring((char*)encoded_buffer, hex_str);
+            log_trace("\t%s", hex_str);
+
+            bool tx_result = tx_handler(encoded_buffer, encoded_size);
             return_status = return_status && tx_result;
         } else {
             log_error("tx handler undefined!");

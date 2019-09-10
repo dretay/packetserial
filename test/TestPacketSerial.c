@@ -115,7 +115,9 @@ bool dummy_test_send_small_packet_packet_parser(pb_istream_t* stream)
 }
 bool dummy_test_send_small_packet_tx_handler(u8* buffer, size_t size)
 {
-    return ProtoBuff.explicit_unmarshal(buffer, size, true, dummy_test_send_small_packet_packet_parser);
+    uint8_t decoded_data_array[size];
+    cobs_decode(decoded_data_array, BUFFER_SIZE, buffer, size - 1);
+    return ProtoBuff.explicit_unmarshal(decoded_data_array, size - 1, true, dummy_test_send_small_packet_packet_parser);
 }
 
 void test_send_small_packet(void)
@@ -152,7 +154,9 @@ bool dummy_test_send_big_packet_packet_parser(pb_istream_t* stream)
 }
 bool dummy_test_send_big_packet_tx_handler(u8* buffer, size_t size)
 {
-    return ProtoBuff.explicit_unmarshal(buffer, size, true, dummy_test_send_big_packet_packet_parser);
+    uint8_t decoded_data_array[size];
+    cobs_decode(decoded_data_array, BUFFER_SIZE, buffer, size - 1);
+    return ProtoBuff.explicit_unmarshal(decoded_data_array, size, true, dummy_test_send_big_packet_packet_parser);
 }
 
 void test_send_big_packet(void)
@@ -174,7 +178,9 @@ void dummy_test_send_little_hid_report_parse_hidreport(pb_istream_t* stream, con
 }
 bool dummy_test_send_little_hid_report_tx_handler(u8* buffer, size_t size)
 {
-    return ProtoBuff.explicit_unmarshal(buffer, size, true, dummy_test_send_big_packet_packet_parser);
+    uint8_t decoded_data_array[size];
+    cobs_decode(decoded_data_array, BUFFER_SIZE, buffer, size - 1);
+    return ProtoBuff.explicit_unmarshal(decoded_data_array, size, true, dummy_test_send_big_packet_packet_parser);
 }
 
 void test_send_little_hid_report(void)
@@ -223,7 +229,9 @@ bool dummy_test_send_big_hid_report_packet_parser(pb_istream_t* stream)
 }
 bool dummy_test_send_big_hid_report_tx_handler(u8* buffer, size_t size)
 {
-    return ProtoBuff.explicit_unmarshal(buffer, size, true, dummy_test_send_big_hid_report_packet_parser);
+    uint8_t decoded_data_array[size];
+    cobs_decode(decoded_data_array, BUFFER_SIZE, buffer, size - 1);
+    return ProtoBuff.explicit_unmarshal(decoded_data_array, size, true, dummy_test_send_big_hid_report_packet_parser);
 }
 
 void test_send_big_hid_report(void)
@@ -251,7 +259,9 @@ void dummy_test_receive_report_parser(pb_istream_t* stream, const pb_field_t* ty
 }
 bool dummy_test_receive_report_tx_handler(u8* buffer, size_t size)
 {
-    return PacketSerial.process((const char*)buffer, size);
+    uint8_t decoded_data_array[size];
+    cobs_decode(decoded_data_array, BUFFER_SIZE, buffer, size - 1);
+    return PacketSerial.process((const char*)decoded_data_array, size);
 }
 void test_receive_report(void)
 {

@@ -18,4 +18,7 @@ to debug a test
 kdbg build/TestPacketSerial.c.o.out
 
 to build an arm so
-make clean && make sharedobject PLATFORM=ARM DEBUG=0
+make clean && make release PLATFORM=ARM DEBUG=0
+
+to copy over to windows
+rm /mnt/windows/include/libpacketserial.a; rm -rf /mnt/windows/include/packetserial/*;cp release/libpacketserial.a /mnt/windows/include/; cp release/include/* /mnt/windows/include/packetserial/

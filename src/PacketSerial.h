@@ -13,6 +13,8 @@
 
 #include "ProtoBuff.h"
 #include "bithelper.h"
+#include "cobs.h"
+#include "hexhelper.h"
 #include "log.h"
 #include "type_shortcuts.h"
 
