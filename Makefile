@@ -57,11 +57,18 @@ CPPCHECK_FILES := $(shell find $(SRC_DIRS) -maxdepth 2 \( -iname "*.c" ! -iname 
 CPPCHECK_FLAGS = -q --enable=all --inconclusive --suppress=missingIncludeSystem
 CPPCHECK_RESULTS = $(CPPCHECK_FILES:%=$(CPPCHECK_RESULTS_DIR)%.txt)
 
+#swig
+SWIG = swig
+SWIG_DIR = $(BUILD_DIR)swig/
+SWIG_FLAGS = -python -I$(SRC_DIRS)
+PYTHON_INCLUDES = $(shell python3-config --includes)
+
 #misc variables
 DIRECTIVES = -DPB_FIELD_16BIT -DLOG_USE_COLOR -DUNITY_OUTPUT_COLOR -DLOG_USE_COLOR
 FLAGS = -fPIC
 INC_FLAGS := $(addprefix -I,$(INC_DIRS)) -I$(UNITY_ROOT)/src -I./src
 CURRENT_DIR = $(notdir $(shell pwd))
+CP = cp
 
 #various build flags
 DEBUG ?= 1
@@ -78,11 +85,11 @@ endif
 PLATFORM ?= LINUX
 ifeq ($(PLATFORM), ARM)
 	CC = arm-none-eabi-gcc
-	LD = arm-none-eabi-gcc
+	LD = arm-none-eabi-ld
 	AR = arm-none-eabi-ar
 else
 	CC = gcc
-	LD = gcc
+	LD = ld
 	AR = ar
 endif
 
@@ -100,6 +107,7 @@ endif
 .PHONY: clean
 .PHONY: cppcheck
 .PHONY: includes
+.PHONY: swig
 
 all: $(PBMODELS) $(RUNNERS) $(OBJS) cppcheck
 
@@ -108,7 +116,7 @@ includes: $(PBMODELS)
 	cp $(HEADERS) $(INCLUDE_DEST)
 
 release: sharedobject $(RELEASE_DIR)lib$(CURRENT_DIR).a
-sharedobject: all includes $(BUILD_DIR)lib$(CURRENT_DIR).so
+sharedobject: all includes $(RELEASE_DIR)lib$(CURRENT_DIR).so
 
 test: all $(TEST_OBJS) $(TEST_RESULTS) $(CPPCHECK_RESULTS)
 	@echo ""
@@ -129,10 +137,10 @@ test: all $(TEST_OBJS) $(TEST_RESULTS) $(CPPCHECK_RESULTS)
 profile: all $(PROFILING_RESULTS)
 
 $(RELEASE_DIR)lib$(CURRENT_DIR).a:
-	$(AR) $(ARFLAGS) $@ $(BUILD_DIR)lib$(CURRENT_DIR).so
+	$(AR) $(ARFLAGS) $@ $(RELEASE_DIR)lib$(CURRENT_DIR).so
 
 #link objects into an so to be included elsewhere
-$(BUILD_DIR)lib$(CURRENT_DIR).so: $(OBJS)
+$(RELEASE_DIR)lib$(CURRENT_DIR).so: $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) -shared -o $@
 
 #generate profiling data
@@ -173,9 +181,17 @@ $(TEST_RUNNERS)%.c:: $(TEST_DIRS)%.c
 	$(MKDIR) $(dir $@)
 	ruby $(UNITY_ROOT)/auto/generate_test_runner.rb $< $@
 
-jupyter: all pythondeps
+swig: sharedobject
+	$(MKDIR) $(SWIG_DIR)
+	$(CP) $(CONFIG_DIR)$(CURRENT_DIR).i $(SWIG_DIR)
+	$(SWIG) $(SWIG_FLAGS) $(SWIG_DIR)$(CURRENT_DIR).i
+	$(CC) $(INC_FLAGS) $(PYTHON_INCLUDES) -fPIC -shared -c $(SWIG_DIR)$(CURRENT_DIR)_wrap.c -o $(SWIG_DIR)$(CURRENT_DIR)_wrap.o
+	$(LD) -shared $(SWIG_DIR)$(CURRENT_DIR)_wrap.o $(RELEASE_DIR)lib$(CURRENT_DIR).so  -o $(RELEASE_DIR)$(CURRENT_DIR)_wrap.so
+jupyter: swig pythondeps
 	( \
 		cd ./python_venv; \
+		. ./bin/activate; \
+		ipython kernel install --user --name=$(CURRENT_DIR); \
 		jupyter notebook; \
 	)
 
