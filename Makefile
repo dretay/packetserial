@@ -59,6 +59,14 @@ CPPCHECK_RESULTS = $(CPPCHECK_FILES:%=$(CPPCHECK_RESULTS_DIR)%.txt)
 
 #swig
 SWIG = swig
+SWIG_SRC = $(wildcard $(SWIG_DIR)*.c)
+SRCSWIG = $(wildcard $(SWIG_DIR)*.i)
+SWIGWRAPPERS = $(patsubst $(SWIG_DIR)%.i,$(SWIG_DIR)%_wrap.c,$(SRCSWIG) )
+SWIG_OBJS = $(patsubst $(SWIG_DIR)%.i,$(BUILD_DIR)$(SWIG_DIR)%_wrap.c.o,$(SRCSWIG) ) build/swig/swig_stuff.c.o
+SWIG_FLAGS = -python -I$(SRC_DIRS)
+
+#swig
+SWIG = swig
 SWIG_DIR = $(BUILD_DIR)swig/
 SWIG_FLAGS = -python -I$(SRC_DIRS)
 PYTHON_INCLUDES = $(shell python3-config --includes)
@@ -181,12 +189,19 @@ $(TEST_RUNNERS)%.c:: $(TEST_DIRS)%.c
 	$(MKDIR) $(dir $@)
 	ruby $(UNITY_ROOT)/auto/generate_test_runner.rb $< $@
 
-swig: sharedobject
-	$(MKDIR) $(SWIG_DIR)
-	$(CP) $(CONFIG_DIR)$(CURRENT_DIR).i $(SWIG_DIR)
-	$(SWIG) $(SWIG_FLAGS) $(SWIG_DIR)$(CURRENT_DIR).i
-	$(CC) $(INC_FLAGS) $(PYTHON_INCLUDES) -fPIC -shared -c $(SWIG_DIR)$(CURRENT_DIR)_wrap.c -o $(SWIG_DIR)$(CURRENT_DIR)_wrap.o
-	$(LD) -shared $(SWIG_DIR)$(CURRENT_DIR)_wrap.o $(RELEASE_DIR)lib$(CURRENT_DIR).so  -o $(RELEASE_DIR)$(CURRENT_DIR)_wrap.so
+#swig function library
+$(BUILD_DIR)%.c.o: %.c
+	$(MKDIR) $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+#swig wrappers
+$(SWIG_DIR)%_wrap.c:: $(SWIG_DIR)%.i
+	$(SWIG) $(SWIG_FLAGS) $<
+
+
+swig: sharedobject $(SWIG_OBJS)
+	$(LD) -shared $(SWIG_OBJS) $(OBJS) -o $(RELEASE_DIR)$@_wrapper.so
+
 jupyter: swig pythondeps
 	( \
 		cd ./python_venv; \
