@@ -186,6 +186,7 @@ bool dummy_test_send_little_hid_report_tx_handler(u8* buffer, size_t size)
 
 void test_send_little_hid_report(void)
 {
+    log_debug("little report");
     bool result = ProtoBuff.add_handler(HIDReport_fields, &dummy_test_send_little_hid_report_parse_hidreport);
     TEST_ASSERT_TRUE(result);
     UnionMessage message = UnionMessage_init_zero;
@@ -276,4 +277,59 @@ void test_receive_report(void)
     PacketSerial.register_tx_handler(&dummy_test_receive_report_tx_handler);
     bool success = PacketSerial.send((char*)my_buffer, size);
     TEST_ASSERT_TRUE(success);
+}
+
+void dummy_test_byte_at_a_time_receive_report_parser(pb_istream_t* stream, const pb_field_t* type)
+{
+    HIDReport report;
+    if (ProtoBuff.decode_union(stream, type, &report)) {
+        TEST_ASSERT_EQUAL_STRING("test1test2test3test4test5test6test7testtest1test2test3test4test5test6test7test", report.data);
+    } else {
+        TEST_FAIL_MESSAGE("Failed to parse report");
+    }
+}
+bool dummy_test_byte_at_a_time_receive_report_tx_handler(u8* buffer, size_t size)
+{
+    bool retval = true;
+    for (int i = 0; i < size; i++) {
+        retval = retval && PacketSerial.process((const char*)&buffer[i], 1);
+    }
+    return retval;
+}
+void test_byte_at_a_time_receive_report(void)
+{
+    log_info("\n\ntest_byte_at_a_time_receive_report\n\n");
+    bool result = ProtoBuff.add_handler(HIDReport_fields, &dummy_test_byte_at_a_time_receive_report_parser);
+    TEST_ASSERT_TRUE(result);
+
+    UnionMessage message = UnionMessage_init_zero;
+    message.has_hid_report = true;
+    strncpy(message.hid_report.data, "test1test2test3test4test5test6test7testtest1test2test3test4test5test6test7test", strlen("test1test2test3test4test5test6test7testtest1test2test3test4test5test6test7test") + 1);
+    uint8_t my_buffer[300] = { 0 };
+    int size = ProtoBuff.marshal(&message, UnionMessage_fields, my_buffer, 300, true);
+
+    PacketSerial.register_tx_handler(&dummy_test_byte_at_a_time_receive_report_tx_handler);
+    bool success = PacketSerial.send((char*)my_buffer, size);
+    TEST_ASSERT_TRUE(success);
+}
+void dummy_test_process_dummy_packet_parse_hidreport(pb_istream_t* stream, const pb_field_t* type)
+{
+    log_info("\n\nHELLO\n\n");
+    HIDReport report;
+    if (ProtoBuff.decode_union(stream, type, &report)) {
+        log_info("\n\nHELLO\n\n");
+        TEST_ASSERT_EQUAL_STRING("hello", report.data);
+    } else {
+        TEST_FAIL_MESSAGE("Failed to parse report");
+    }
+}
+void test_process_dummy_packet(void)
+{
+    u8 arr[] = { 0x0F, 0x12, 0x0A, 0x0A, 0x09, 0x12, 0x07, 0x0A, 0x05, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x10, 0x05, 0x18, 0x63, 0x20, 0x03, 0x00 };
+    log_info("\n\ntest_process_dummy_packet\n\n");
+
+    bool result = ProtoBuff.add_handler(HIDReport_fields, &dummy_test_process_dummy_packet_parse_hidreport);
+    TEST_ASSERT_TRUE(result);
+    result = PacketSerial.process(arr, 21);
+    TEST_ASSERT_TRUE(result);
 }

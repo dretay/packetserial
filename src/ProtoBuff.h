@@ -11,6 +11,7 @@
 #include "bithelper.h"
 #include "hid.pb.h"
 #include "log.h"
+#include "type_shortcuts.h"
 
 typedef bool (*PROTOBUFF_UNMARSHAL_CALLBACK_FNP)(pb_istream_t*);
 

@@ -26,6 +26,7 @@ LIB_DIRS = lib/
 TEST_DIRS = test/
 TEST_RUNNERS = $(TEST_DIRS)test_runners/
 INCLUDE_DEST = $(RELEASE_DIR)include/
+SRC_DEST = $(RELEASE_DIR)src/
 
 #protobuf files
 SRCPB = $(wildcard $(SRC_DIRS)*.proto)
@@ -72,38 +73,52 @@ SWIG_FLAGS = -python -I$(SRC_DIRS)
 PYTHON_INCLUDES = $(shell python3-config --includes)
 
 #misc variables
-DIRECTIVES = -DPB_FIELD_16BIT -DLOG_USE_COLOR -DUNITY_OUTPUT_COLOR -DLOG_USE_COLOR
+DIRECTIVES = -DPB_FIELD_16BIT -DLOG_USE_COLOR -DUNITY_OUTPUT_COLOR
 FLAGS = -fPIC
 INC_FLAGS := $(addprefix -I,$(INC_DIRS)) -I$(UNITY_ROOT)/src -I./src
 CURRENT_DIR = $(notdir $(shell pwd))
 CP = cp
-
+CFLAGS = $(INC_FLAGS) $(FLAGS) $(DIRECTIVES)
 #various build flags
+
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
-	CFLAGS = $(INC_FLAGS) $(FLAGS) $(DIRECTIVES) -g3
+	CFLAGS +=   -O0 -g3
 	LDFLAGS = -shared
-	ARFLAGS = rcs
 else
-	CFLAGS = $(INC_FLAGS) $(FLAGS) $(DIRECTIVES) -Os
+	CFLAGS +=  -Os
 	LDFLAGS = -shared
-	ARFLAGS = rcs
+# 	ARFLAGS = rcs
 endif
 
 PLATFORM ?= LINUX
-ifeq ($(PLATFORM), ARM)
+ifeq ($(PLATFORM),$(filter $(PLATFORM),NRF51 STM32F103))
+	#set instruction set to thumb... debatably arm might be valid too i guess but I'm too lazy and this code
+	#doesn't really have zero wait to worry about...
+	CFLAGS += -mthumb
+	# set the ABI to aapcs (current standard, needs to be set consistently or linker will explode?)
+	CFLAGS += -mabi=aapcs
+	# keep every function in separate section. This will allow linker to dump unused functions
+	CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
+	# don't use functions built-into gcc
+	CFLAGS += -fno-builtin
+
+
+	ARFLAGS += --target elf32-littlearm
 	CC = arm-none-eabi-gcc
 	LD = arm-none-eabi-ld
 	AR = arm-none-eabi-ar
+endif
+ifeq ($(PLATFORM), NRF51)
+	#setting this wrong (like m4) means weird stuff like hard faults when an int goes negative...
+	CPU	= cortex-m0
+	CFLAGS += -mcpu=$(CPU)
 else
+	DIRECTIVES += -DLINUX
 	CC = gcc
 	LD = ld
 	AR = ar
 endif
-
-
-# $(info $$HEADERS is [${HEADERS}])
-
 
 .PHONY: all
 .PHONY: release
@@ -122,8 +137,10 @@ all: $(PBMODELS) $(RUNNERS) $(OBJS) cppcheck
 includes: $(PBMODELS)
 	$(MKDIR) $(INCLUDE_DEST)
 	cp $(HEADERS) $(INCLUDE_DEST)
+	$(MKDIR) $(SRC_DEST)
+	cp $(SRCS) $(PBMODELS) $(SRC_DEST)
 
-release: sharedobject $(RELEASE_DIR)lib$(CURRENT_DIR).a
+release: all includes $(RELEASE_DIR)lib$(CURRENT_DIR).a
 sharedobject: all includes $(RELEASE_DIR)lib$(CURRENT_DIR).so
 
 test: all $(TEST_OBJS) $(TEST_RESULTS) $(CPPCHECK_RESULTS)
@@ -144,8 +161,8 @@ test: all $(TEST_OBJS) $(TEST_RESULTS) $(CPPCHECK_RESULTS)
 
 profile: all $(PROFILING_RESULTS)
 
-$(RELEASE_DIR)lib$(CURRENT_DIR).a:
-	$(AR) $(ARFLAGS) $@ $(RELEASE_DIR)lib$(CURRENT_DIR).so
+$(RELEASE_DIR)lib$(CURRENT_DIR).a: $(OBJS)
+	$(AR) $(ARFLAGS) $@ $(OBJS)
 
 #link objects into an so to be included elsewhere
 $(RELEASE_DIR)lib$(CURRENT_DIR).so: $(OBJS)
