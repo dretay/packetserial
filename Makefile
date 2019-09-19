@@ -60,17 +60,12 @@ CPPCHECK_RESULTS = $(CPPCHECK_FILES:%=$(CPPCHECK_RESULTS_DIR)%.txt)
 
 #swig
 SWIG = swig
+SWIG_DIR = $(BUILD_DIR)swig/
 SWIG_SRC = $(wildcard $(SWIG_DIR)*.c)
 SRCSWIG = $(wildcard $(SWIG_DIR)*.i)
 SWIGWRAPPERS = $(patsubst $(SWIG_DIR)%.i,$(SWIG_DIR)%_wrap.c,$(SRCSWIG) )
 SWIG_OBJS = $(patsubst $(SWIG_DIR)%.i,$(BUILD_DIR)$(SWIG_DIR)%_wrap.c.o,$(SRCSWIG) ) build/swig/swig_stuff.c.o
 SWIG_FLAGS = -python -I$(SRC_DIRS)
-
-#swig
-SWIG = swig
-SWIG_DIR = $(BUILD_DIR)swig/
-SWIG_FLAGS = -python -I$(SRC_DIRS)
-PYTHON_INCLUDES = $(shell python3-config --includes)
 
 #misc variables
 DIRECTIVES = -DPB_FIELD_16BIT -DLOG_USE_COLOR -DUNITY_OUTPUT_COLOR
@@ -78,7 +73,7 @@ FLAGS = -fPIC
 INC_FLAGS := $(addprefix -I,$(INC_DIRS)) -I$(UNITY_ROOT)/src -I./src
 CURRENT_DIR = $(notdir $(shell pwd))
 CP = cp
-CFLAGS = $(INC_FLAGS) $(FLAGS) $(DIRECTIVES)
+CFLAGS = $(INC_FLAGS) $(FLAGS) $(DIRECTIVES) --std=gnu99
 #various build flags
 
 DEBUG ?= 1
@@ -99,10 +94,9 @@ ifeq ($(PLATFORM),$(filter $(PLATFORM),NRF51 STM32F103))
 	# set the ABI to aapcs (current standard, needs to be set consistently or linker will explode?)
 	CFLAGS += -mabi=aapcs
 	# keep every function in separate section. This will allow linker to dump unused functions
-	CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
+#  	CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
 	# don't use functions built-into gcc
 	CFLAGS += -fno-builtin
-
 
 	ARFLAGS += --target elf32-littlearm
 	CC = arm-none-eabi-gcc
@@ -113,6 +107,8 @@ ifeq ($(PLATFORM), NRF51)
 	#setting this wrong (like m4) means weird stuff like hard faults when an int goes negative...
 	CPU	= cortex-m0
 	CFLAGS += -mcpu=$(CPU)
+	#software floating point
+	CFLAGS +=-mfloat-abi=soft
 else
 	DIRECTIVES += -DLINUX
 	CC = gcc
@@ -131,6 +127,17 @@ endif
 .PHONY: cppcheck
 .PHONY: includes
 .PHONY: swig
+.PHONY: cheat
+
+# so i've kinda given up on making this one mega static library. it works for individual functions
+# but chaining calls in between different objects breaks in a way i don't understand. For now I'm just
+# going to copy this over to a folder on my computer and move on with my life... maybe
+# the "right" thing to do is to have smaller static libraries that are built up in a larger main project?
+cheat:
+	$(CLEANUP)r /mnt/windows/include/packetserial
+	$(MKDIR) /mnt/windows/include/packetserial
+	cp $(HEADERS) /mnt/windows/include/packetserial
+	cp $(SRCS) $(PBMODELS) /mnt/windows/include/packetserial
 
 all: $(PBMODELS) $(RUNNERS) $(OBJS) cppcheck
 

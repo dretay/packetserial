@@ -161,7 +161,10 @@ static bool process(const char* buffer, size_t size)
 
         uint8_t decoded_data_array[msg_size];
         cobs_decode(decoded_data_array, msg_size, rx_buffer, msg_size);
-        bool return_val = ProtoBuff.explicit_unmarshal((u8*)decoded_data_array, msg_size, true, packet_parser);
+        // bool return_val = ProtoBuff.explicit_unmarshal((u8*)decoded_data_array, msg_size, true, NULL);
+        ProtoBuff.test();
+        u8 arr[] = { 0x0F, 0x12, 0x0A, 0x0A, 0x09, 0x12, 0x07, 0x0A, 0x05, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x10, 0x05, 0x18, 0x63, 0x20, 0x03, 0x00 };
+        bool return_val = ProtoBuff.explicit_unmarshal(arr, 21, true, NULL);
         if (return_val) {
             log_debug("packet successfully parsed");
             reset_rx_buffer();

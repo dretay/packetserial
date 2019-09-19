@@ -30,6 +30,7 @@ struct protobuff {
     bool (*decode_union)(pb_istream_t* stream, const pb_field_t fields[], void* dest_struct);
     bool (*decode)(pb_istream_t* stream, const pb_field_t fields[], void* dest_struct);
     void (*clear_handlers)(void);
+    bool (*test)(void);
 };
 
 extern const struct protobuff ProtoBuff;

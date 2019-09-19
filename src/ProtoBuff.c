@@ -155,8 +155,13 @@ static void clear_handlers(void)
     memset((void*)handlers, 0, sizeof(handlers));
     handlers_usage_mask = 0;
 }
+static bool test(void)
+{
+    return true;
+}
 
 const struct protobuff ProtoBuff = {
+    .test = test,
     .marshal = marshal,
     .unmarshal = unmarshal,
     .add_handler = add_handler,
