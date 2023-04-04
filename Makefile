@@ -31,7 +31,7 @@ SRC_DEST = $(RELEASE_DIR)src/
 #protobuf files
 SRCPB = $(wildcard $(SRC_DIRS)*.proto)
 PBMODELS = $(patsubst $(SRC_DIRS)%.proto,$(SRC_DIRS)%.pb.c,$(SRCPB) )
-PROTOC = /home/drew/src/nanopb-0.3.9.3/generator-bin/protoc
+PROTOC = ./lib/nanopb-0.3.9.3/generator-bin/protoc
 PB_OBJS = $(patsubst $(SRC_DIRS)%.proto,$(BUILD_DIR)$(SRC_DIRS)%.pb.c.o,$(SRCPB) )
 
 #unity testing files
@@ -40,7 +40,7 @@ RUNNERS = $(patsubst $(TEST_DIRS)%.c,$(TEST_RUNNERS)%.c,$(SRCT) )
 TEST_RESULTS = $(patsubst $(TEST_DIRS)Test%.c,$(TEST_RESULTS_DIR)Test%.txt,$(SRCT) )
 PROFILING_RESULTS = $(patsubst $(TEST_DIRS)Test%.c,$(PROFILING_RESULTS_DIR)Test%.out,$(SRCT) )
 TEST_OBJS = $(SRCT:%=$(BUILD_DIR)%.o)
-UNITY_ROOT=/home/drew/src/Unity
+UNITY_ROOT=./lib/Unity-2.5.2
 
 #valgrind stuff
 VALGRIND = /usr/bin/valgrind
@@ -127,17 +127,17 @@ endif
 .PHONY: cppcheck
 .PHONY: includes
 .PHONY: swig
-.PHONY: cheat
+#.PHONY: cheat
 
 # so i've kinda given up on making this one mega static library. it works for individual functions
 # but chaining calls in between different objects breaks in a way i don't understand. For now I'm just
 # going to copy this over to a folder on my computer and move on with my life... maybe
 # the "right" thing to do is to have smaller static libraries that are built up in a larger main project?
-cheat:
-	$(CLEANUP)r /mnt/windows/include/packetserial
-	$(MKDIR) /mnt/windows/include/packetserial
-	cp $(HEADERS) /mnt/windows/include/packetserial
-	cp $(SRCS) $(PBMODELS) /mnt/windows/include/packetserial
+#cheat:
+#	$(CLEANUP)r /mnt/windows/include/packetserial
+#	$(MKDIR) /mnt/windows/include/packetserial
+#	cp $(HEADERS) /mnt/windows/include/packetserial
+#	cp $(SRCS) $(PBMODELS) /mnt/windows/include/packetserial
 
 all: $(PBMODELS) $(RUNNERS) $(OBJS) cppcheck
 

@@ -57,7 +57,7 @@ void test_crc8(void)
 }
 void test_build_packet(void)
 {
-    char data[] = { 't', 'e', 's', 't' };
+    char data[] = { 't', 'e', 's', 't', '\0' };
     u8 sequence_number = 1;
     u8 crc = PacketSerial.calculate_crc(data, sizeof(data));
     Packet packet = Packet_init_zero;
@@ -83,7 +83,7 @@ bool dummy_test_marshal_unmarshal_packet_parser(pb_istream_t* stream)
 void test_marshal_unmarshal_packet(void)
 {
     u8 buffer[Packet_size] = { 0 };
-    char data[] = { 't', 'e', 's', 't' };
+    char data[] = { 't', 'e', 's', 't', '\0' };
     u8 sequence_number = 1;
     u8 crc = PacketSerial.calculate_crc(data, sizeof(data));
     Packet_Flag flag = Packet_Flag_FIRST;
@@ -98,7 +98,7 @@ void test_marshal_unmarshal_packet(void)
 
     size_t size = ProtoBuff.marshal(&packet, Packet_fields, buffer, Packet_size, true);
     printf("\nEncoded message into %ld bytes of %d total\n\n", size, Packet_size);
-    TEST_ASSERT_EQUAL(size, 14);
+    TEST_ASSERT_EQUAL(size, 13);
     ProtoBuff.explicit_unmarshal(buffer, Packet_size, true, dummy_test_marshal_unmarshal_packet_parser);
 }
 
