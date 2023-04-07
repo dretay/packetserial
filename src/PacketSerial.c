@@ -121,7 +121,7 @@ static bool packet_parser(pb_istream_t* stream)
         packet_buffer_offset += packet_data_size;
         log_trace("Packet buffer now at %d/%d (%d rx'd)", (packet_buffer_offset - packet_buffer), PACKET_BUFFER_SIZE, packet_data_size);
 
-        if (packet.flag == Packet_Flag_LAST) {
+        if (packet.flag == Packet_Flag_LAST || packet.flag == Packet_Flag_FIRSTLAST) {
             log_trace("Last packet received, attempting to parse");
             if (ProtoBuff.unmarshal((u8*)packet_buffer, PACKET_BUFFER_SIZE, true)) {
                 log_trace("Parsing successful, resetting buffer");
