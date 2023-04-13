@@ -1,0 +1,3 @@
+Packet.sequence_number int_size:IS_8
+Packet.crc int_size:IS_8
+Packet.data max_size:16

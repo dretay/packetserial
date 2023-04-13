@@ -1,0 +1,69 @@
+syntax = "proto2";
+import "nanopb.proto";
+message GDispLine{	
+	required sint32 x0 = 1;
+	required sint32 y0 = 2;
+	required sint32 x1 = 3;
+	required sint32 y1 = 4;
+}
+message GDispThickLine{	
+	required sint32 x0 = 1;
+	required sint32 y0 = 2;
+	required sint32 x1 = 3;
+	required sint32 y1 = 4;
+	required sint32 width = 5;
+	required bool rounded = 6;
+}
+message GDispPixel{	
+	required sint32 x = 1;
+	required sint32 y = 2;
+}
+message GDispFillCircle{	
+	required sint32 x = 1;
+	required sint32 y = 2;
+	required sint32 radius = 3;
+}
+message GDispCircle{	
+	required sint32 x = 1;
+	required sint32 y = 2;
+	required sint32 radius = 3;
+}
+message GDispStringBox{
+	required sint32 x = 1;
+	required sint32 y = 2;
+	required sint32 cx = 3;
+	required sint32 cy = 4;
+	required string str = 5 [(nanopb).type = FT_POINTER];
+}
+message GDispFlush{
+}
+message GDispClear{
+}
+
+message UnionMessage{
+	optional GDispLine line = 1;
+	optional GDispThickLine thick_line = 2;
+	optional GDispPixel pixel = 3;
+	optional GDispFillCircle fill_circle = 4;
+	optional GDispCircle circle = 5;
+	optional GDispStringBox string_box = 6;
+	optional GDispFlush flush = 7;
+	optional GDispClear clear = 8;
+}
+message Packet{
+	required bytes data = 1;
+	required uint32 sequence_number = 2;
+	required uint32 crc = 3;
+	enum Flag {
+		FIRST = 0;
+		CONTINUE = 1;
+		LAST = 2;
+		FIRSTLAST = 3;
+	}
+	required Flag flag = 4;
+}
+
+message PayloadData
+{
+    repeated UnionMessage union_message_arr = 5 [(nanopb).type = FT_STATIC, (nanopb).max_count=10];
+}

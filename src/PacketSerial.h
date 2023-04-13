@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "hid.pb.h"
+#include "messages.pb.h"
 #include <Crc8.h>
 #include <pb.h>
 #include <pb_common.h>
@@ -18,6 +18,7 @@
 #include "log.h"
 #include "type_shortcuts.h"
 
+
 #define PACKET_BUFFER_SIZE 300
 typedef bool (*PACKETSERIAL_HANDLER_FNP)(u8*, size_t);
 
@@ -29,6 +30,7 @@ struct packetserial {
     PACKETSERIAL_HANDLER_FNP(*get_tx_handler)
     (void);
     void (*register_tx_handler)(void* handler);
+    void (*register_rx_handler)(void* handler);
     void (*clear_handlers)(void);
     u8 (*calculate_crc)(const char* buffer, size_t size);
     void (*build_packet)(Packet* packet, const char* buffer, size_t size, u8 sequence_number, Packet_Flag flag);
@@ -39,3 +41,4 @@ struct packetserial {
 };
 
 extern const struct packetserial PacketSerial;
+

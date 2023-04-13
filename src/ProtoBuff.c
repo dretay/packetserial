@@ -170,3 +170,4 @@ const struct protobuff ProtoBuff = {
     .explicit_unmarshal = explicit_unmarshal,
     .decode = pb_decode,
 };
+

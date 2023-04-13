@@ -4,10 +4,16 @@ python_venv
 
 test/test_runners/
 
-src/hid.pb.c
+src/messages.pb.c
 
-src/hid.pb.h
+src/messages.pb.h
 
 packetserial.sublime-workspace
 
 lib/nanopb-0.3.9.3/generator-bin
+
+src/helpers.c
+
+test.py
+
+release/

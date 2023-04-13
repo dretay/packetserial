@@ -68,7 +68,7 @@ SWIG_OBJS = $(patsubst $(SWIG_DIR)%.i,$(BUILD_DIR)$(SWIG_DIR)%_wrap.c.o,$(SRCSWI
 SWIG_FLAGS = -python -I$(SRC_DIRS)
 
 #misc variables
-DIRECTIVES = -DPB_FIELD_16BIT -DLOG_USE_COLOR -DUNITY_OUTPUT_COLOR
+DIRECTIVES = -DPB_FIELD_16BIT -DLOG_USE_COLOR -DUNITY_OUTPUT_COLOR -DPB_ENABLE_MALLOC
 FLAGS = -fPIC
 INC_FLAGS := $(addprefix -I,$(INC_DIRS)) -I$(UNITY_ROOT)/src -I./src
 CURRENT_DIR = $(notdir $(shell pwd))
@@ -206,7 +206,7 @@ $(BUILD_DIR)%.c.o: %.c
 
 # protocol buffer models
 $(SRC_DIRS)%.pb.c:: $(SRC_DIRS)%.proto
-	$(PROTOC) --nanopb_out=. $<
+	$(PROTOC) --nanopb_out=./src -I=./lib/nanopb-0.3.9.3/generator/proto -I=./src --nanopb_opt=-I./src $<
 
 #unity test runners
 $(TEST_RUNNERS)%.c:: $(TEST_DIRS)%.c

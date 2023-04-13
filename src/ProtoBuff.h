@@ -1,5 +1,6 @@
 #pragma once
 
+#include <messages.pb.h>
 #include <pb.h>
 #include <pb_common.h>
 #include <pb_decode.h>
@@ -9,7 +10,6 @@
 #include <stdlib.h>
 
 #include "bithelper.h"
-#include "hid.pb.h"
 #include "log.h"
 #include "type_shortcuts.h"
 
@@ -34,3 +34,4 @@ struct protobuff {
 };
 
 extern const struct protobuff ProtoBuff;
+

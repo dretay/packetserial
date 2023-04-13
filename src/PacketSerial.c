@@ -9,6 +9,8 @@ static int rx_buffer_remaining = Packet_size + 1;
 static char* packet_buffer_offset = packet_buffer;
 
 static bool (*tx_handler)(u8* buffer, size_t size);
+static bool (*rx_handler)(u8* buffer, size_t size);
+
 
 static u8 calculate_crc(const char* buffer, size_t size)
 {
@@ -20,15 +22,16 @@ static u8 calculate_crc(const char* buffer, size_t size)
 }
 static void build_packet(Packet* packet, const char* buffer, size_t size, u8 sequence_number, Packet_Flag flag)
 {
-    strncpy(packet->data, buffer, size);
-    packet->crc = calculate_crc(packet->data, size);
+    memcpy(packet->data.bytes, buffer, size);
+    packet->data.size = size;
+    packet->crc = calculate_crc(packet->data.bytes, size);
     packet->sequence_number = sequence_number;
     packet->flag = flag;
 }
 
 static bool send(const char* buffer, size_t size)
 {
-    unsigned int data_chunk_size = member_size(Packet, data) - 1;
+    unsigned int data_chunk_size = member_size(Packet, data.bytes) - 1;
 
     //take the ceiling
     unsigned int total_chunks = (size + data_chunk_size - 1) / data_chunk_size;
@@ -92,6 +95,10 @@ static void register_tx_handler(void* handler)
 {
     tx_handler = handler;
 }
+static void register_rx_handler(void* handler)
+{
+    rx_handler = handler;
+}
 static PACKETSERIAL_HANDLER_FNP get_tx_handler(void)
 {
     return tx_handler;
@@ -116,21 +123,22 @@ static bool packet_parser(pb_istream_t* stream)
 {
     Packet packet;
     if (ProtoBuff.decode(stream, Packet_fields, &packet)) {
-        int packet_data_size = strlen(packet.data);
-        strncpy(packet_buffer_offset, packet.data, packet_data_size);
-        packet_buffer_offset += packet_data_size;
-        log_trace("Packet buffer now at %d/%d (%d rx'd)", (packet_buffer_offset - packet_buffer), PACKET_BUFFER_SIZE, packet_data_size);
+        memcpy(packet_buffer_offset, packet.data.bytes, packet.data.size);
+        packet_buffer_offset += packet.data.size;
+        log_trace("Packet buffer now at %d/%d (%d rx'd)", (packet_buffer_offset - packet_buffer), PACKET_BUFFER_SIZE, packet.data.size);
 
         if (packet.flag == Packet_Flag_LAST || packet.flag == Packet_Flag_FIRSTLAST) {
             log_trace("Last packet received, attempting to parse");
-            if (ProtoBuff.unmarshal((u8*)packet_buffer, PACKET_BUFFER_SIZE, true)) {
-                log_trace("Parsing successful, resetting buffer");
-                reset_packet_buffer();
-            } else {
-                log_trace("Unable to parse data, resetting buffer");
-                reset_packet_buffer();
-                return false;
-            }
+            rx_handler((u8*)packet_buffer, PACKET_BUFFER_SIZE);
+            reset_packet_buffer();
+//            if (ProtoBuff.unmarshal((u8*)packet_buffer, PACKET_BUFFER_SIZE, true)) {
+//                log_trace("Parsing successful, resetting buffer");
+//                reset_packet_buffer();
+//            } else {
+//                log_trace("Unable to parse data, resetting buffer");
+//                reset_packet_buffer();
+//                return false;
+//            }
         }
     } else {
         log_trace("Unable to decode stream into pb model");
@@ -184,6 +192,7 @@ static char* get_packet_buffer(void)
 const struct packetserial PacketSerial = {
     .send = send,
     .register_tx_handler = register_tx_handler,
+	.register_rx_handler = register_rx_handler,
     .get_tx_handler = get_tx_handler,
     .process = process,
     .clear_handlers = clear_handlers,
@@ -194,3 +203,4 @@ const struct packetserial PacketSerial = {
     .get_packet_buffer = get_packet_buffer,
     .reset_rx_buffer = reset_rx_buffer,
 };
+
