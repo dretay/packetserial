@@ -5,7 +5,7 @@
 Project encapsulates logic needed to break down a "large" message into smaller packets that can be transmitted between uControllers.
 
 ### Compiling ###
-apt install ruby valgrind cppcheck pip3
+apt install ruby valgrind cppcheck python3-pip protobuf-compiler
 pip3 install pyinstaller
 cd lib/nanopb-0.3.9.3/tools
 DEST=/home/parallels/src/packetserial/lib/nanopb-0.3.9.3 ./make_linux_package.sh
