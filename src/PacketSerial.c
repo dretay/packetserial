@@ -129,16 +129,18 @@ static bool packet_parser(pb_istream_t* stream)
 
         if (packet.flag == Packet_Flag_LAST || packet.flag == Packet_Flag_FIRSTLAST) {
             log_trace("Last packet received, attempting to parse");
-            rx_handler((u8*)packet_buffer, PACKET_BUFFER_SIZE);
-            reset_packet_buffer();
-//            if (ProtoBuff.unmarshal((u8*)packet_buffer, PACKET_BUFFER_SIZE, true)) {
-//                log_trace("Parsing successful, resetting buffer");
-//                reset_packet_buffer();
-//            } else {
-//                log_trace("Unable to parse data, resetting buffer");
-//                reset_packet_buffer();
-//                return false;
-//            }
+            if(rx_handler != NULL){
+                rx_handler((u8*)packet_buffer, PACKET_BUFFER_SIZE);
+                reset_packet_buffer();
+            }
+            else if (ProtoBuff.unmarshal((u8*)packet_buffer, PACKET_BUFFER_SIZE, true)) {
+                log_trace("Parsing successful, resetting buffer");
+                reset_packet_buffer();
+            } else {
+                log_trace("Unable to parse data, resetting buffer");
+                reset_packet_buffer();
+                return false;
+            }
         }
     } else {
         log_trace("Unable to decode stream into pb model");
