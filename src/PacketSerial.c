@@ -78,8 +78,11 @@ static bool send(const char* buffer, size_t size)
             log_debug("Transmitted %ld bytes of %d buffer for packet %d of %d", encoded_size, Packet_size, i, total_chunks - 1);
 
             char hex_str[(encoded_size * 2) + 1];
+            string2hexstring((char*)unencoded_buffer, hex_str);
+            log_trace("\t (pre cobs) %s", hex_str);
+
             string2hexstring((char*)encoded_buffer, hex_str);
-            log_trace("\t%s", hex_str);
+            log_trace("\t (cobs) %s", hex_str);
 
             bool tx_result = tx_handler(encoded_buffer, encoded_size);
             return_status = return_status && tx_result;

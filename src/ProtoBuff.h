@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "hexhelper.h"
 #include "bithelper.h"
 #include "log.h"
 #include "type_shortcuts.h"

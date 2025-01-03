@@ -80,8 +80,9 @@ static bool _unmarshal(pb_byte_t* buf, size_t bufsize, bool delimited, PROTOBUFF
     pb_istream_t* decode_stream = &parent_stream;
     pb_istream_t sub_stream;
     bool retval = false;
-    if (delimited) {
+    if (delimited) {        
         log_trace("attempting to decode a delimited message");
+        
         if (!pb_make_string_substream(&parent_stream, &sub_stream)) {
             log_error("unable to make substream");
             return false;
