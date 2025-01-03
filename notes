@@ -23,3 +23,5 @@ make clean && make release PLATFORM=ARM DEBUG=0
 to copy over to windows
 make clean;make release DEBUG=1 PLATFORM=NRF51;rm /mnt/windows/include/libpacketserial.a; rm -rf /mnt/windows/include/packetserial;cp release/libpacketserial.a /mnt/windows/include/; mkdir /mnt/windows/include/packetserial;cp release/include/* /mnt/windows/include/packetserial/;mkdir /mnt/windows/include/packetserial/src;cp release/src/* /mnt/windows/include/packetserial/src/
 
+docker build -t packetserial:1.0.0 .
+docker run -v .:/app -it packetserial:1.0.0
