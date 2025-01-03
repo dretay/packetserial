@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+message DeviceDescriptor{
+	required string iManufacturer = 1;
+	required string iProduct = 2;
+	required uint32 bMaxPacketSize0 = 3;
+}
+message HIDReport{
+	required string data = 1;
+}
+message InputReport{
+	required string data = 1;
+}

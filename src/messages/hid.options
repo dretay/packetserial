@@ -1,0 +1,6 @@
+DeviceDescriptor.iManufacturer max_size:64
+DeviceDescriptor.iProduct max_size:64
+
+HIDReport.data max_size:256
+
+InputReport.data max_size:64

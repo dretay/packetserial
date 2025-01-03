@@ -11,3 +11,4 @@ WORKDIR /opt/nanopb-0.3.9.3/tools
 RUN dos2unix ./make_linux_package.sh
 RUN DEST=/opt/nanopb-0.3.9.3 ./make_linux_package.sh
 WORKDIR /app
+ENTRYPOINT ["/app/run.sh"]

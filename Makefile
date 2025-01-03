@@ -29,10 +29,10 @@ INCLUDE_DEST = $(RELEASE_DIR)include/
 SRC_DEST = $(RELEASE_DIR)src/
 
 #protobuf files
-SRCPB = $(wildcard $(SRC_DIRS)*.proto)
-PBMODELS = $(patsubst $(SRC_DIRS)%.proto,$(SRC_DIRS)%.pb.c,$(SRCPB) )
+SRCPB = $(wildcard $(SRC_DIRS)messages/*.proto)
+PBMODELS = $(patsubst $(SRC_DIRS)messages/%.proto,$(SRC_DIRS)messages/%.pb.c,$(SRCPB) )
 PROTOC = /opt/nanopb-0.3.9.3/generator-bin/protoc
-PB_OBJS = $(patsubst $(SRC_DIRS)%.proto,$(BUILD_DIR)$(SRC_DIRS)%.pb.c.o,$(SRCPB) )
+PB_OBJS = $(patsubst $(SRC_DIRS)messages/%.proto,$(BUILD_DIR)$(SRC_DIRS)messages/%.pb.c.o,$(SRCPB) )
 
 #unity testing files
 SRCT = $(wildcard $(TEST_DIRS)*.c)
@@ -70,7 +70,7 @@ SWIG_FLAGS = -python -I$(SRC_DIRS)
 #misc variables
 DIRECTIVES = -DPB_FIELD_16BIT -DLOG_USE_COLOR -DUNITY_OUTPUT_COLOR -DPB_ENABLE_MALLOC
 FLAGS = -fPIC
-INC_FLAGS := $(addprefix -I,$(INC_DIRS)) -I$(UNITY_ROOT)/src -I./src
+INC_FLAGS := $(addprefix -I,$(INC_DIRS)) -I$(UNITY_ROOT)/src -I./src -I./src/messages
 CURRENT_DIR = $(notdir $(shell pwd))
 CP = cp
 CFLAGS = $(INC_FLAGS) $(FLAGS) $(DIRECTIVES) --std=gnu99
@@ -147,7 +147,7 @@ includes: $(PBMODELS)
 	$(MKDIR) $(SRC_DEST)
 	cp $(SRCS) $(PBMODELS) $(SRC_DEST)
 
-release: all includes $(RELEASE_DIR)lib$(CURRENT_DIR).a
+release: all includes #$(RELEASE_DIR)lib$(CURRENT_DIR).a
 sharedobject: all includes $(RELEASE_DIR)lib$(CURRENT_DIR).so
 
 test: all $(TEST_OBJS) $(TEST_RESULTS) $(CPPCHECK_RESULTS)
@@ -206,7 +206,7 @@ $(BUILD_DIR)%.c.o: %.c
 
 # protocol buffer models
 $(SRC_DIRS)%.pb.c:: $(SRC_DIRS)%.proto
-	$(PROTOC) --nanopb_out=./src -I=./lib/nanopb-0.3.9.3/generator/proto -I=./src --nanopb_opt=-I./src $<
+	$(PROTOC) --nanopb_out=./src/messages -I=./lib/nanopb-0.3.9.3/generator/proto -I=./src/messages --nanopb_opt=-I./src/messages $<
 
 #unity test runners
 $(TEST_RUNNERS)%.c:: $(TEST_DIRS)%.c
@@ -241,7 +241,7 @@ pythondeps:
 	)
 
 clean:
-	$(CLEANUP) $(SRC_DIRS)*.pb.*
+	$(CLEANUP) $(SRC_DIRS)messages/*.pb.*
 	$(CLEANUP)r $(BUILD_DIR)
 	$(CLEANUP)r $(RELEASE_DIR)
 
