@@ -31,7 +31,7 @@ SRC_DEST = $(RELEASE_DIR)src/
 #protobuf files
 SRCPB = $(wildcard $(SRC_DIRS)*.proto)
 PBMODELS = $(patsubst $(SRC_DIRS)%.proto,$(SRC_DIRS)%.pb.c,$(SRCPB) )
-PROTOC = ./lib/nanopb-0.3.9.3/generator-bin/protoc
+PROTOC = /opt/nanopb-0.3.9.3/generator-bin/protoc
 PB_OBJS = $(patsubst $(SRC_DIRS)%.proto,$(BUILD_DIR)$(SRC_DIRS)%.pb.c.o,$(SRCPB) )
 
 #unity testing files

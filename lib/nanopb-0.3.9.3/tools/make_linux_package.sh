@@ -8,11 +8,14 @@
 set -e
 set -x
 
-#rm -rf $DEST
-#mkdir -p $DEST
+# VERSION=`git describe --always`-linux-x86
+# DEST=dist/$VERSION
+
+# rm -rf $DEST
+# mkdir -p $DEST
 
 # Export the files from newest commit
-#git archive HEAD | tar x -C $DEST
+# git archive HEAD | tar x -C $DEST
 
 # Rebuild the Python .proto files
 make -BC $DEST/generator/proto
@@ -42,8 +45,8 @@ EOF
 chmod +x $DEST/generator-bin/protoc
 
 # Remove debugging symbols to reduce size of package
-( cd $DEST/generator-bin; strip *.so *.so.* )
+# ( cd $DEST/generator-bin; strip *.so *.so.* )
 
 # Tar it all up
-#( cd dist; tar -czf $VERSION.tar.gz $VERSION )
+# ( cd dist; tar -czf $VERSION.tar.gz $VERSION )
 

@@ -64,7 +64,7 @@ void test_build_packet(void)
     Packet_Flag flag = Packet_Flag_FIRST;
     PacketSerial.build_packet(&packet, data, sizeof(data), sequence_number, flag);
 
-    TEST_ASSERT_EQUAL_STRING(packet.data, data);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY(&packet.data, &data, 5);
     TEST_ASSERT_EQUAL(packet.sequence_number, sequence_number);
     TEST_ASSERT_EQUAL(packet.crc, crc);
     TEST_ASSERT_EQUAL(packet.flag, flag);
