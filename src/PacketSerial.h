@@ -33,7 +33,7 @@ struct packetserial {
     void (*register_rx_handler)(void* handler);
     void (*clear_handlers)(void);
     u8 (*calculate_crc)(const char* buffer, size_t size);
-    void (*build_packet)(Packet* packet, const char* buffer, size_t size, u8 sequence_number, Packet_Flag flag);
+    void (*build_packet)(Packet* packet, const uint8_t* buffer, size_t size, u8 sequence_number, Packet_Flag flag);
     void (*reset_packet_buffer)(void);
     char* (*get_packet_buffer_offset)(void);
     char* (*get_packet_buffer)(void);

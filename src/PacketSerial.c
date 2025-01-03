@@ -20,7 +20,7 @@ static u8 calculate_crc(const char* buffer, size_t size)
     }
     return crc;
 }
-static void build_packet(Packet* packet, const char* buffer, size_t size, u8 sequence_number, Packet_Flag flag)
+static void build_packet(Packet* packet, const uint8_t* buffer, size_t size, u8 sequence_number, Packet_Flag flag)
 {
     memcpy(packet->data.bytes, buffer, size);
     packet->data.size = size;
