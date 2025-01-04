@@ -19,3 +19,5 @@ test.py
 release/
 python/.ipynb_checkpoints
 python/swig/__pycache__
+python/swig/_PacketDAO.cpython-311-x86_64-linux-gnu.so
+python/swig/PacketDAO_wrap.c
