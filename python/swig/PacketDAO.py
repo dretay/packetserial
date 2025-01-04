@@ -59,6 +59,27 @@ class _SwigNonDynamicMeta(type):
 
 
 
-def add(a, b):
-    return _PacketDAO.add(a, b)
+def cdata(ptr, nelements=1):
+    return _PacketDAO.cdata(ptr, nelements)
+
+def memmove(data, indata):
+    return _PacketDAO.memmove(data, indata)
+
+def new_charArray(nelements):
+    return _PacketDAO.new_charArray(nelements)
+
+def delete_charArray(ary):
+    return _PacketDAO.delete_charArray(ary)
+
+def charArray_getitem(ary, index):
+    return _PacketDAO.charArray_getitem(ary, index)
+
+def charArray_setitem(ary, index, value):
+    return _PacketDAO.charArray_setitem(ary, index, value)
+
+def cdata_char(ptr, nelements=1):
+    return _PacketDAO.cdata_char(ptr, nelements)
+
+def char_test(packet):
+    return _PacketDAO.char_test(packet)
 

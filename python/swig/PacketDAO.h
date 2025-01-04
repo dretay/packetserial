@@ -2,4 +2,4 @@
 #include "PacketSerial.h"
 #include "ProtoBuff.h"
 
-int add(int a, int b);
+void char_test(char *packet);
