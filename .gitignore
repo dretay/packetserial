@@ -17,3 +17,4 @@ src/helpers.c
 test.py
 
 release/
+python/.ipynb_checkpoints

@@ -1,0 +1,2 @@
+swig -outcurrentdir -python ../PacketDAO.i
+gcc -fPIC -DPB_FIELD_16BIT -DPB_ENABLE_MALLOC -DLINUX --std=gnu99 -O0 -I../../../release/include -I../../../release/src -c ../PacketDAO.c PacketDAO_wrap.c

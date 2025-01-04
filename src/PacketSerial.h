@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "messages/packetserial.pb.h"
+#include "packetserial.pb.h"
 #include <Crc8.h>
 #include <pb.h>
 #include <pb_common.h>
