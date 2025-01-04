@@ -5,6 +5,8 @@
 Project encapsulates logic needed to break down a "large" message into smaller packets that can be transmitted between uControllers.
 
 ### Compiling ###
+(WIN)
+You need USB support to be added to WSL: https://learn.microsoft.com/en-us/windows/wsl/connect-usb#attach-a-usb-device.
 (LINUX)
 apt install ruby valgrind cppcheck python3-pip protobuf-compiler
 pip3 install pyinstaller
