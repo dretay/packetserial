@@ -2,4 +2,4 @@
 #include "PacketSerial.h"
 #include "ProtoBuff.h"
 
-void hello();
+int add(int a, int b);

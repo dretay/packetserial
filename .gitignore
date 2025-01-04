@@ -18,3 +18,4 @@ test.py
 
 release/
 python/.ipynb_checkpoints
+python/swig/__pycache__

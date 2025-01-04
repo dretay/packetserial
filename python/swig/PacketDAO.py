@@ -62,7 +62,7 @@ class _SwigNonDynamicMeta(type):
 
 
 
-def hello():
-    return _PacketDAO.hello()
+def add(a, b):
+    return _PacketDAO.add(a, b)
 
 
