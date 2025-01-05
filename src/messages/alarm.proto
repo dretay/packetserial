@@ -1,0 +1,20 @@
+syntax = "proto2";
+
+message Speak{
+	required string data = 1;
+}
+message Time{
+	required uint32 hours = 1;
+	required uint32 minutes = 2;
+    required uint32 seconds = 3;
+}
+message Alarm{
+	required uint32 hours = 1;
+	required uint32 minutes = 2;
+    required uint32 seconds = 3;
+    required bool enabled = 4;
+}
+message Lighting{
+	required uint32 color = 1;
+    required uint32 brightness = 2;
+}

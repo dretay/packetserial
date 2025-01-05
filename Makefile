@@ -58,15 +58,6 @@ CPPCHECK_FILES := $(shell find $(SRC_DIRS) -maxdepth 2 \( -iname "*.c" ! -iname 
 CPPCHECK_FLAGS = -q --enable=all --inconclusive --suppress=missingIncludeSystem
 CPPCHECK_RESULTS = $(CPPCHECK_FILES:%=$(CPPCHECK_RESULTS_DIR)%.txt)
 
-#swig
-SWIG = swig
-SWIG_DIR = $(BUILD_DIR)swig/
-SWIG_SRC = $(wildcard $(SWIG_DIR)*.c)
-SRCSWIG = $(wildcard $(SWIG_DIR)*.i)
-SWIGWRAPPERS = $(patsubst $(SWIG_DIR)%.i,$(SWIG_DIR)%_wrap.c,$(SRCSWIG) )
-SWIG_OBJS = $(patsubst $(SWIG_DIR)%.i,$(BUILD_DIR)$(SWIG_DIR)%_wrap.c.o,$(SRCSWIG) ) build/swig/swig_stuff.c.o
-SWIG_FLAGS = -python -I$(SRC_DIRS)
-
 #misc variables
 DIRECTIVES = -DPB_FIELD_16BIT -DLOG_USE_COLOR -DUNITY_OUTPUT_COLOR -DPB_ENABLE_MALLOC
 FLAGS = -fPIC
@@ -118,7 +109,6 @@ endif
 
 .PHONY: all
 .PHONY: release
-.PHONY: sharedobject
 .PHONY: test
 .PHONY: profile
 .PHONY: jupyter
@@ -126,7 +116,7 @@ endif
 .PHONY: clean
 .PHONY: cppcheck
 .PHONY: includes
-.PHONY: swig
+.PHONY: dockerbuild
 #.PHONY: cheat
 
 # so i've kinda given up on making this one mega static library. it works for individual functions
@@ -147,8 +137,7 @@ includes: $(PBMODELS)
 	$(MKDIR) $(SRC_DEST)
 	cp $(SRCS) $(PBMODELS) $(SRC_DEST)
 
-release: all includes #$(RELEASE_DIR)lib$(CURRENT_DIR).a
-sharedobject: all includes $(RELEASE_DIR)lib$(CURRENT_DIR).so
+release: all includes
 
 test: all $(TEST_OBJS) $(TEST_RESULTS) $(CPPCHECK_RESULTS)
 	@echo ""
@@ -222,22 +211,17 @@ $(BUILD_DIR)%.c.o: %.c
 $(SWIG_DIR)%_wrap.c:: $(SWIG_DIR)%.i
 	$(SWIG) $(SWIG_FLAGS) $<
 
-
-swig: sharedobject $(SWIG_OBJS)
-	$(LD) -shared $(SWIG_OBJS) $(OBJS) -o $(RELEASE_DIR)$@_wrapper.so
-
-jupyter: swig pythondeps
+dockerbuild: 
 	( \
-		cd ./python_venv; \
-		. ./bin/activate; \
-		ipython kernel install --user --name=$(CURRENT_DIR); \
-		jupyter notebook; \
+		docker run -v .:/app -it packetserial:1.0.0; \
 	)
-
-pythondeps:
+jupyter: dockerbuild
 	( \
-		. ./python_venv/bin/activate; \
-		pip install -r ./python_venv/requirements.txt; \
+		cd ./python/swig; \
+		make clean; \
+		make; \
+		cd ..;\
+		jupyter notebook --no-browser;\
 	)
 
 clean:

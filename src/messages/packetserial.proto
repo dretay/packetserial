@@ -1,10 +1,15 @@
 syntax = "proto2";
 import "hid.proto";
+import "alarm.proto";
 
 message UnionMessage{
 	optional DeviceDescriptor device_descriptor = 1;
 	optional HIDReport hid_report = 2;
 	optional InputReport input_report = 3;
+	optional Speak speak = 4;
+	optional Time time = 5;
+	optional Alarm alarm = 6;
+	optional Lighting lighting = 7;
 }
 
 message Packet{
