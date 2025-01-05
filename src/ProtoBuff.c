@@ -39,7 +39,7 @@ static bool decode_union(pb_istream_t* stream, const pb_field_t fields[], void* 
     return status;
 }
 
-static size_t marshal(void* src, const pb_field_t fields[], pb_byte_t* buf, size_t bufsize, bool delimited)
+size_t marshal(void* src, const pb_field_t fields[], pb_byte_t* buf, size_t bufsize, bool delimited)
 {
     /* Create a stream that will write to our buffer. */
     pb_ostream_t stream = pb_ostream_from_buffer(buf, bufsize);
@@ -172,3 +172,9 @@ const struct protobuff ProtoBuff = {
     .decode = pb_decode,
 };
 
+void protobuff_test(){
+    int i =1;
+    if(i==0){
+        i = 1;
+    }
+}

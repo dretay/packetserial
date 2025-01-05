@@ -33,6 +33,6 @@ struct protobuff {
     void (*clear_handlers)(void);
     bool (*test)(void);
 };
-
+void protobuff_test();
 extern const struct protobuff ProtoBuff;
 
