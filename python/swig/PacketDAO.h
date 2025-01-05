@@ -2,4 +2,5 @@
 #include "PacketSerial.h"
 #include "ProtoBuff.h"
 
-void char_test(char *packet);
+int generate_speak(char* speech, int speech_size);
+// char* get_packet_buffer(int index);
