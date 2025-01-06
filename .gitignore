@@ -22,3 +22,9 @@ python/swig/__pycache__
 python/swig/_PacketDAO.cpython-311-x86_64-linux-gnu.so
 python/swig/PacketDAO_wrap.c
 _PacketDAO.cpython-311-darwin.so
+src/messages/alarm.pb.c
+src/messages/alarm.pb.h
+src/messages/hid.pb.c
+src/messages/hid.pb.h
+src/messages/packetserial.pb.c
+src/messages/packetserial.pb.h
