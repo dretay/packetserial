@@ -12,7 +12,7 @@ Sometimes you have a project where you want to send data back and forth between 
 
 # Compiling and Testing
 ## Compiling
-Since the ProtoBuf requires that the models be compiled, you can't just import the project, but rather must generate the models and then include them. Rather than requiring you to install a bunch of dependencies, I've included a container to do the compilation. Running `make dockerbuild` will build the container, install the dependencies, run tests, and generate a `release` folder with all the relevant source code.
+Since the ProtoBuf requires that the models be compiled, you can't just import the project, but rather must generate the models and then include them. Rather than requiring you to install a bunch of dependencies (and deal with really annoying issues like the fact that OSX doesn't support Valgrind), I've included a container to do the compilation. Running `make dockerbuild` will build the container, install the dependencies, run tests, and generate a `release` folder with all the relevant source code.
 
 ## Testing
 Once you've developed your models and built a client, you may want to test the project from your PC rather than on a second microcontroller. To help with that I've included a Jupyter notebook that you can use to send messages to the microcontroller. When you invoke `make jupyter` the build target will dynamically build a SWIG interface to the C code and expose it to Python. You can then invoke the C code directly through Python to send serial messages over something like a GreatFET. 
