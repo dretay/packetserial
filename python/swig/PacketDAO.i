@@ -2,8 +2,7 @@
 %include "carrays.i"
 %include "cdata.i"
 
-%array_functions(char, charArray);
-%cdata(char) 
+%array_functions(int, intArray);
 
 %{
 #define SWIG_FILE_WITH_INIT

@@ -1,19 +1,14 @@
 #include "PacketDAO.h"
 
-char packet_buffer[10][32];
+u8 packet_buffer[10][32];
 int packet_cnt = 0;
 
-void get_packet_buffer(int index, char* dest){
+u8* get_packet_buffer(int index){    
     int size=32;
     char hex_str[(size * 2) + 1];
     string2hexstring((char*)packet_buffer[index], hex_str);
     printf("(get_packet_buffer) %s", hex_str);
-
-
-    for(int i=0;i<32;i++){
-        dest[i] = packet_buffer[index][i];
-    }
-    
+    return packet_buffer[index];    
 }
 bool tx_handler(u8* buffer, size_t size){
   

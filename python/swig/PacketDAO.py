@@ -65,24 +65,21 @@ def cdata(ptr, nelements=1):
 def memmove(data, indata):
     return _PacketDAO.memmove(data, indata)
 
-def new_charArray(nelements):
-    return _PacketDAO.new_charArray(nelements)
+def new_intArray(nelements):
+    return _PacketDAO.new_intArray(nelements)
 
-def delete_charArray(ary):
-    return _PacketDAO.delete_charArray(ary)
+def delete_intArray(ary):
+    return _PacketDAO.delete_intArray(ary)
 
-def charArray_getitem(ary, index):
-    return _PacketDAO.charArray_getitem(ary, index)
+def intArray_getitem(ary, index):
+    return _PacketDAO.intArray_getitem(ary, index)
 
-def charArray_setitem(ary, index, value):
-    return _PacketDAO.charArray_setitem(ary, index, value)
-
-def cdata_char(ptr, nelements=1):
-    return _PacketDAO.cdata_char(ptr, nelements)
+def intArray_setitem(ary, index, value):
+    return _PacketDAO.intArray_setitem(ary, index, value)
 
 def generate_speak(speech, speech_size):
     return _PacketDAO.generate_speak(speech, speech_size)
 
-def get_packet_buffer(index, dest):
-    return _PacketDAO.get_packet_buffer(index, dest)
+def get_packet_buffer(index):
+    return _PacketDAO.get_packet_buffer(index)
 
