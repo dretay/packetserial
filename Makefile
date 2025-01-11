@@ -117,17 +117,6 @@ endif
 .PHONY: cppcheck
 .PHONY: includes
 .PHONY: dockerbuild
-#.PHONY: cheat
-
-# so i've kinda given up on making this one mega static library. it works for individual functions
-# but chaining calls in between different objects breaks in a way i don't understand. For now I'm just
-# going to copy this over to a folder on my computer and move on with my life... maybe
-# the "right" thing to do is to have smaller static libraries that are built up in a larger main project?
-#cheat:
-#	$(CLEANUP)r /mnt/windows/include/packetserial
-#	$(MKDIR) /mnt/windows/include/packetserial
-#	cp $(HEADERS) /mnt/windows/include/packetserial
-#	cp $(SRCS) $(PBMODELS) /mnt/windows/include/packetserial
 
 all: $(PBMODELS) $(RUNNERS) $(OBJS) cppcheck
 
@@ -201,15 +190,6 @@ $(SRC_DIRS)%.pb.c:: $(SRC_DIRS)%.proto
 $(TEST_RUNNERS)%.c:: $(TEST_DIRS)%.c
 	$(MKDIR) $(dir $@)
 	ruby $(UNITY_ROOT)/auto/generate_test_runner.rb $< $@
-
-#swig function library
-$(BUILD_DIR)%.c.o: %.c
-	$(MKDIR) $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-#swig wrappers
-$(SWIG_DIR)%_wrap.c:: $(SWIG_DIR)%.i
-	$(SWIG) $(SWIG_FLAGS) $<
 
 dockerbuild: 
 	( \

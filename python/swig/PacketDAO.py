@@ -83,3 +83,6 @@ def generate_speak(speech, speech_size):
 def get_packet_buffer(index):
     return _PacketDAO.get_packet_buffer(index)
 
+def generate_neopixel_pulse():
+    return _PacketDAO.generate_neopixel_pulse()
+
